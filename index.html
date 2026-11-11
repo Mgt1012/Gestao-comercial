@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mercearia Bom Preço - Gestão Comercial</title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Menu Lateral -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-store"></i>
+      </div>
+      <div class="brand-text">
+        <h2>Mercearia Bom Preço</h2>
+        <span>Gestão comercial</span>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <button class="nav-btn active" data-target="sec-dashboard">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </button>
+      <button class="nav-btn" data-target="sec-vendas">
+        <i class="fa-solid fa-cart-shopping"></i> Vendas
+      </button>
+      <button class="nav-btn" data-target="sec-produtos">
+        <i class="fa-solid fa-box-archive"></i> Produtos
+      </button>
+      <button class="nav-btn" data-target="sec-estoque">
+        <i class="fa-solid fa-boxes-stacked"></i> Estoque
+      </button>
+      <button class="nav-btn" data-target="sec-clientes">
+        <i class="fa-solid fa-users"></i> Clientes
+      </button>
+      <button class="nav-btn" data-target="sec-relatorios">
+        <i class="fa-solid fa-chart-line"></i> Relatórios
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+    
+    <!-- Painel Principal (Dashboard) -->
+    <section id="sec-dashboard" class="content-section active">
+      <header class="page-header">
+        <h1>Dashboard</h1>
+        <p>Resumo do seu negócio hoje</p>
+      </header>
+
+      <div class="cards-grid">
+        <div class="card stat-card card-green">
+          <div class="stat-info">
+            <span class="stat-title">Vendas hoje</span>
+            <h2 id="dash-vendas-hoje">R$ 0,00</h2>
+            <span class="stat-sub" id="dash-vendas-hoje-count">0 vendas realizadas</span>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-shopping-bag"></i></div>
+        </div>
+
+        <div class="card stat-card card-purple">
+          <div class="stat-info">
+            <span class="stat-title">Faturamento do mês</span>
+            <h2 id="dash-faturamento-mes">R$ 0,00</h2>
+            <span class="stat-sub" id="dash-faturamento-mes-count">0 vendas no mês</span>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-dollar-sign"></i></div>
+        </div>
+
+        <div class="card stat-card card-blue">
+          <div class="stat-info">
+            <span class="stat-title">Produtos cadastrados</span>
+            <h2 id="dash-produtos-count">0</h2>
+            <span class="stat-sub" id="dash-produtos-total-itens">0 itens em estoque</span>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
+        </div>
+
+        <div class="card stat-card card-amber">
+          <div class="stat-info">
+            <span class="stat-title">Estoque baixo</span>
+            <h2 id="dash-estoque-baixo-count">0</h2>
+            <span class="stat-sub">produtos abaixo do mínimo</span>
+          </div>
+          <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        </div>
+      </div>
+
+      <div class="grid-2-col">
+        <div class="card chart-card">
+          <h3>Faturamento — últimos 14 dias</h3>
+          <div class="chart-container">
+            <canvas id="chartDashboard14Dias"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-flex">
+            <h3>Alertas de estoque</h3>
+            <button class="btn-link" id="btn-ver-estoque">Ver estoque</button>
+          </div>
+          <ul class="alert-list" id="dash-alertas-lista"></ul>
+        </div>
+      </div>
+
+      <div class="card margin-top">
+        <div class="card-header-flex">
+          <h3>Últimas vendas</h3>
+          <button class="btn-primary" data-target="sec-vendas">+ Nova venda</button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Cliente</th>
+                <th>Resumo</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="dash-ultimas-vendas-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulo de Vendas (POS) -->
+    <section id="sec-vendas" class="content-section">
+      <header class="page-header">
+        <h1>Vendas</h1>
+        <p>Ponto de venda — selecione os produtos</p>
+      </header>
+
+      <div class="grid-pos">
+        <div class="pos-products-area">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="pos-search-input" placeholder="Buscar produto..." />
+          </div>
+          <div class="products-grid" id="pos-products-grid"></div>
+        </div>
+
+        <div class="card pos-cart-card">
+          <h3>Venda atual</h3>
+          <div class="cart-items-list" id="pos-cart-items">
+            <div class="empty-state">
+              <i class="fa-solid fa-basket-shopping"></i>
+              <p>Nenhum item adicionado</p>
+            </div>
+          </div>
+
+          <div class="cart-controls">
+            <div class="form-group">
+              <label for="pos-cliente-select">Cliente</label>
+              <select id="pos-cliente-select"></select>
+            </div>
+            <div class="form-group">
+              <label for="pos-pagamento-select">Forma de Pagamento</label>
+              <select id="pos-pagamento-select">
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Dinheiro">Dinheiro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pos-desconto-input">Desconto (%)</label>
+              <input type="number" id="pos-desconto-input" value="0" min="0" max="100" />
+            </div>
+
+            <div class="cart-summary">
+              <div class="summary-row"><span>Subtotal</span><span id="pos-subtotal">R$ 0,00</span></div>
+              <div class="summary-row total"><span>Total</span><span id="pos-total">R$ 0,00</span></div>
+            </div>
+
+            <button type="button" class="btn-success btn-full" id="btn-finalizar-venda">Finalizar venda</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card margin-top">
+        <h3>Vendas recentes</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Cliente</th>
+                <th>Itens</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="pos-vendas-recentes-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cadastro de Produtos -->
+    <section id="sec-produtos" class="content-section">
+      <header class="page-header flex-between">
+        <div>
+          <h1>Produtos</h1>
+          <p id="prod-total-count">0 produtos cadastrados</p>
+        </div>
+        <button class="btn-primary" id="btn-modal-novo-produto"><i class="fa-solid fa-plus"></i> Novo produto</button>
+      </header>
+
+      <div class="card">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="prod-search-input" placeholder="Buscar produto ou categoria..." />
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Custo</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="produtos-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controle de Estoque -->
+    <section id="sec-estoque" class="content-section">
+      <header class="page-header">
+        <h1>Estoque</h1>
+        <p>Registre entradas e saídas de mercadorias</p>
+      </header>
+
+      <div class="grid-2-col">
+        <div class="card">
+          <h3>Nova movimentação</h3>
+          <form id="form-movimentacao" class="form-stack">
+            <div class="tabs-segmented">
+              <button type="button" class="tab-btn active" data-type="Entrada"><i class="fa-solid fa-arrow-down"></i> Entrada</button>
+              <button type="button" class="tab-btn" data-type="Saída"><i class="fa-solid fa-arrow-up"></i> Saída</button>
+            </div>
+            
+            <div class="form-group">
+              <label for="mov-produto-select">Produto</label>
+              <select id="mov-produto-select" required></select>
+            </div>
+            <div class="form-group">
+              <label for="mov-quantidade-input">Quantidade</label>
+              <input type="number" id="mov-quantidade-input" min="1" value="1" required />
+            </div>
+            <div class="form-group">
+              <label for="mov-obs-input">Observação</label>
+              <input type="text" id="mov-obs-input" placeholder="Ex.: Nota fiscal, reposição, avaria..." />
+            </div>
+
+            <button type="submit" class="btn-primary btn-full" id="btn-submit-mov">Registrar entrada</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Posição atual</h3>
+          <div class="stock-progress-list" id="stock-progress-list"></div>
+        </div>
+      </div>
+
+      <div class="card margin-top">
+        <h3>Histórico de movimentações</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Tipo</th>
+                <th>Produto / Obs</th>
+                <th>Qtd</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="historico-mov-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gestão de Clientes -->
+    <section id="sec-clientes" class="content-section">
+      <header class="page-header flex-between">
+        <div>
+          <h1>Clientes</h1>
+          <p id="cli-total-count">0 clientes cadastrados</p>
+        </div>
+        <button class="btn-primary" id="btn-modal-novo-cliente"><i class="fa-solid fa-plus"></i> Novo cliente</button>
+      </header>
+
+      <div class="grid-2-col-wide">
+        <div class="client-cards-list" id="clientes-list"></div>
+
+        <div class="card" id="cliente-detalhes-card">
+          <div class="empty-state">
+            <i class="fa-solid fa-user-gear"></i>
+            <p>Selecione um cliente para ver o histórico detalhado</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Relatórios e Métricas -->
+    <section id="sec-relatorios" class="content-section">
+      <header class="page-header">
+        <h1>Relatórios</h1>
+        <p>Desempenho de vendas da mercearia</p>
+      </header>
+
+      <div class="card">
+        <h3>Faturamento mensal</h3>
+        <div class="chart-container large">
+          <canvas id="chartRelatorioMensal"></canvas>
+        </div>
+      </div>
+
+      <div class="grid-2-col margin-top">
+        <div class="card">
+          <h3>Produtos mais vendidos</h3>
+          <ul class="top-products-list" id="relatorio-top-produtos"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Resumo por mês</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Vendas</th>
+                  <th>Ticket Médio</th>
+                  <th>Faturamento</th>
+                </tr>
+              </thead>
+              <tbody id="relatorio-resumo-mes-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Cadastro de Produto -->
+  <div class="modal-overlay" id="modal-produto">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-produto-titulo">Novo Produto</h3>
+        <button type="button" class="btn-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="form-produto">
+        <input type="hidden" id="prod-id" />
+        <div class="form-group">
+          <label for="prod-nome">Nome do Produto</label>
+          <input type="text" id="prod-nome" required placeholder="Ex.: Arroz 5kg" />
+        </div>
+        <div class="form-group">
+          <label for="prod-categoria">Categoria</label>
+          <input type="text" id="prod-categoria" required placeholder="Ex.: Mercearia, Laticínios..." />
+        </div>
+        <div class="grid-2-col">
+          <div class="form-group">
+            <label for="prod-custo">Custo (R$)</label>
+            <input type="number" step="0.01" id="prod-custo" required placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="prod-preco">Preço Venda (R$)</label>
+            <input type="number" step="0.01" id="prod-preco" required placeholder="0.00" />
+          </div>
+        </div>
+        <div class="grid-2-col">
+          <div class="form-group">
+            <label for="prod-estoque">Estoque Inicial / Atual</label>
+            <input type="number" id="prod-estoque" required min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label for="prod-unidade">Unidade de Medida</label>
+            <select id="prod-unidade">
+              <option value="un">Unidade (un)</option>
+              <option value="kg">Quilo (kg)</option>
+              <option value="L">Litro (L)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="prod-minimo">Estoque Mínimo (Alerta)</label>
+          <input type="number" id="prod-minimo" value="5" required min="1" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary btn-close">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro de Cliente -->
+  <div class="modal-overlay" id="modal-cliente">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cliente-titulo">Novo Cliente</h3>
+        <button type="button" class="btn-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="form-cliente">
+        <input type="hidden" id="cli-id" />
+        <div class="form-group">
+          <label for="cli-nome">Nome do Cliente</label>
+          <input type="text" id="cli-nome" required placeholder="Nome completo" />
+        </div>
+        <div class="form-group">
+          <label for="cli-telefone">Telefone / WhatsApp</label>
+          <input type="text" id="cli-telefone" placeholder="(73) 99999-9999" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary btn-close">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
